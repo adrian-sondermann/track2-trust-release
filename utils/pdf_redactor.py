@@ -1,23 +1,23 @@
-from PyPDF2 import PdfReader, PdfWriter
+import fitz  # PyMuPDF
 
 class PDFRedactor:
     @staticmethod
     def redact_sections(pdf_path, sensitive_sections, output_path=None):
         if output_path is None:
             output_path = "redacted_" + pdf_path.split("/")[-1]
-        reader = PdfReader(pdf_path)
-        writer = PdfWriter()
 
-        for page_num in range(len(reader.pages)):
-            page = reader.pages[page_num]
-            text = page.extract_text()
+        doc = fitz.open(pdf_path)
 
+        for page in doc:
             for section in sensitive_sections:
-                if section['text'] in text:
-                    # Ersetze den sensiblen Text mit █████
-                    text = text.replace(section['text'], "█████")
+                value_to_redact = section.get('sensitive_value') or section['text']
+                if not value_to_redact or not value_to_redact.strip():
+                    continue 
+                matches = page.search_for(value_to_redact)
+                #matches = page.search_for(section['text']) # wenn der komplette abschnitt geschwarzt werden soll
+                for match in matches:
+                    page.add_redact_annot(match, fill=(0, 0, 0))  # schwarze Schwärzung
+            page.apply_redactions()
 
-            writer.add_page(page)
-
-        with open(output_path, "wb") as output_file:
-            writer.write(output_file)
+        doc.save(output_path)
+        doc.close()

@@ -5,6 +5,7 @@ import uuid  # <-- Added to generate new keys for file uploader
 from utils.pdf_processor import PDFProcessor
 from utils.sensitivity_checker import SensitivityChecker
 from utils.common import initialize_page
+#from utils.blackout import Blackout
 from utils.pdf_redactor import PDFRedactor
 
 
@@ -100,7 +101,7 @@ def main():
     # Update the UI elements with translated text
     model_choice = st.radio(
         t["model_choice"],
-        options=["Albert", "Azure Open AI","Portal"],
+        options=["Azure Open AI","Portal"], # "Albert" entfernt
         help=t["model_help"]
     )
 
@@ -244,31 +245,37 @@ def main():
                             if confirmed:
                                 confirmed_sections.append(section)  # Add confirmed section to the list
 
-                        # After looping through the sections, check if any sections have been confirmed
-                        if confirmed_sections:
-                            # Apply redactions for confirmed sections
-                            st.write(t["applying_redactions"])
-                            
-                            # Temporärer Speicherort für das geschwärzte PDF
-                            if 'tmp_path' in locals():
-                                redacted_path = f"redacted_{uploaded_file.name}"
-                                
-                                # Schwärzung anwenden
-                                PDFRedactor.redact_sections(tmp_path, confirmed_sections, redacted_path)
-                                
-                                # Datei als Download anbieten
-                                with open(redacted_path, "rb") as file:
-                                    st.download_button(
-                                        label=t["download_redacted"],
-                                        data=file,
-                                        file_name=os.path.basename(redacted_path),
-                                        mime="application/pdf"
-                                    )
+                        if st.button(t["apply"], key=f"apply_{doc_name}"):
+                            # Bestätigte Schwärzungsstellen sammeln
+                            confirmed_sections = []
+                            for i, section in enumerate(doc_data['sensitive_sections']):
+                                if st.session_state.get(f"confirm_{doc_name}_{i}", False):
+                                    confirmed_sections.append(section)
+
+                            if not confirmed_sections:
+                                st.warning("No confirmed redactions. Please select sensitive sections to redact.")
                             else:
-                                st.error("No file processed. Please try again.")
-                        else:
-                            # If no sections were confirmed, inform the user
-                            st.warning("No document has been confirmed for redaction.")
+                                st.write(t["applying_redactions"])
+                                tmp_path = doc_data.get('path')
+                                if tmp_path and os.path.exists(tmp_path):
+                                    redacted_path = f"redacted_{doc_name}"
+                                    
+                                    # Schwärzung anwenden
+                                    #text_values = [s.get('sensitive_value') or s['text'] for s in confirmed_sections]
+                                    #Blackout.redact_sentences(text_values, tmp_path, redacted_path)
+                                    PDFRedactor.redact_sections(tmp_path, confirmed_sections, redacted_path)
+
+                                    # Datei als Download anbieten
+                                    with open(redacted_path, "rb") as file:
+                                        st.download_button(
+                                            label=t["download_redacted"],
+                                            data=file,
+                                            file_name=os.path.basename(redacted_path),
+                                            mime="application/pdf"
+                                        )
+                                else:
+                                    st.error("Originaldatei nicht mehr vorhanden.")
+
 
     # Option to clear all processed data and temporary files
     if st.session_state.processed_docs:
