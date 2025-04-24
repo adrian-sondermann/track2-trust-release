@@ -1,5 +1,5 @@
 # Core dependencies
-streamlit==1.32.0
+streamlit #==1.32.0
 PyPDF2==3.0.1
 python-dotenv==1.0.0
 openai
@@ -8,6 +8,7 @@ pillow==10.2.0
 poppler-utils
 fitz
 plotly
+PyMuPDF
 # Note: This project requires Poppler to be installed separately:
 # Windows: Download from: https://github.com/oschwartz10612/poppler-windows/releases/
 # Linux: sudo apt-get install poppler-utils
