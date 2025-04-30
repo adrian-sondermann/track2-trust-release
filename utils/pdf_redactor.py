@@ -14,7 +14,6 @@ class PDFRedactor:
                 if not value_to_redact or not value_to_redact.strip():
                     continue 
                 matches = page.search_for(value_to_redact)
-                #matches = page.search_for(section['text']) # wenn der komplette abschnitt geschwarzt werden soll
                 for match in matches:
                     page.add_redact_annot(match, fill=(0, 0, 0))  # schwarze Schwärzung
             page.apply_redactions()

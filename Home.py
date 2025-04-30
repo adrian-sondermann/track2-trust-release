@@ -10,6 +10,7 @@ from utils.pdf_redactor import PDFRedactor
 from sidebar import render_sidebar_logo
 from utils.common import initialize_page
 from PIL import Image
+from utils.cleanup import cleanup_temp_pdfs
 
 # Get the absolute path to the image
 current_dir = os.path.dirname(__file__)
@@ -57,6 +58,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 def main():
+    # 🧹 Temp-Ordner aufräumen
+    #cleanup_temp_pdfs() 
+
     # Initialize common elements
     lang = initialize_page()
     

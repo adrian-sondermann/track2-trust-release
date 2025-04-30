@@ -105,6 +105,12 @@ def main():
         help=t["model_help"]
     )
 
+    # Info-Banner einfügen
+    if model_choice == "Azure Open AI":
+        st.info("🔹 *Azure Open AI nutzt derzeit GPT-4o.*", icon="ℹ️")
+    elif model_choice == "Portal":
+        st.warning("⚠️ *Die Modelle im Portal befinden sich derzeit in der Entwicklung. Es kann zu unvollständigen oder fehlerhaften Erkennungen kommen.*", icon="⚠️")
+
     # Initialize session state
     if 'processed_docs' not in st.session_state:
         st.session_state.processed_docs = {}
@@ -290,7 +296,7 @@ def main():
             st.session_state.processed_docs = {}
             # Reset the file uploader's key to clear the uploaded files selection
             st.session_state['uploader_key'] = str(uuid.uuid4())
-            st.experimental_rerun()
+            st.rerun()
             
 if __name__ == "__main__":
     main()
