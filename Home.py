@@ -59,7 +59,7 @@ st.markdown("""
 
 def main():
     # 🧹 Temp-Ordner aufräumen
-    #cleanup_temp_pdfs() 
+    cleanup_temp_pdfs() 
 
     # Initialize common elements
     lang = initialize_page()
