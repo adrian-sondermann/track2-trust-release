@@ -18,12 +18,10 @@ A Streamlit application that checks PDF documents for sensitive information acco
 
 ## Setup
 
-1. Create a `.env` file with your Azure OpenAI and Albert AI credentials:
+1. Create a `.env` file with your Azure OpenAI and Portal credentials:
    ```
    AZURE_OPENAI_KEY=your_key_here
    AZURE_OPENAI_ENDPOINT=your_endpoint_here
-   ALBERT_API_KEY=your_key_here
-   ALBERT_ENDPOINT=your_endpoint_here
    ```
 
 2. Install the required packages:

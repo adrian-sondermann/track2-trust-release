@@ -3,16 +3,18 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Azure OpenAI Configuration
+# Configuration for Azure OpenAI
 AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
 AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")
-AZURE_DEPLOYMENT_NAME = os.getenv("AZURE_DEPLOYMENT_NAME", "o3-mini")
+AZURE_OPENAI_DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
+AZURE_OPENAI_DEPLOYMENT_VERSION = os.getenv("AZURE_OPENAI_DEPLOYMENT_VERSION")
 
-### Configuration for the LangChain AI Portal API.
+# Configuration for the LangChain AI Portal API.
 PORTAL_API_HOST=os.getenv("PORTAL_API_HOST")
-PORTAL_API_API_KEY=os.getenv("PORTAL_API_API_KEY")
+PORTAL_API_KEY=os.getenv("PORTAL_API_KEY")
 PORTAL_API_PORT=os.getenv("PORTAL_API_PORT")
 PORTAL_API_USE_SSL=os.getenv("PORTAL_API_USE_SSL")
+
 PORTAL_API_MODEL_IDENTIFIER=os.getenv("PORTAL_API_MODEL_IDENTIFIER")
 
 # Sensitivity Check Configuration

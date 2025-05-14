@@ -1,51 +1,44 @@
+from string import Template
+
 from openai import AzureOpenAI
-from config import AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_KEY, AZURE_DEPLOYMENT_NAME
-import os
+from config import (
+    AZURE_OPENAI_ENDPOINT,
+    AZURE_OPENAI_KEY,
+    AZURE_OPENAI_DEPLOYMENT_NAME,
+    AZURE_OPENAI_DEPLOYMENT_VERSION
+)
+from utils.base_ai import BaseAIProcessor
 
 
-class AzureAIProcessor:
+class AzureAIProcessor(BaseAIProcessor):
     def __init__(self):
         self.client = AzureOpenAI(
-            api_key=os.getenv("AZURE_OPENAI_KEY"),
-            api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
+            api_key=AZURE_OPENAI_KEY,
+            api_version=AZURE_OPENAI_DEPLOYMENT_VERSION,
+            azure_endpoint=AZURE_OPENAI_ENDPOINT
         )
 
-    def analyze_text(self, text):
-        """Analyze text for sensitive information using Azure OpenAI."""
-        prompt = """
-        Analyze the following text for sensitive information according to GDPR and German 
-        Informationsfreiheitsgesetz (IFG). Identify any:
-        1. Personal data (names, addresses, contact info)
-        2. Special category data (health, religion, political opinions)
-        3. Official secrets
-        4. Business secrets or confidential information
+        self.analysis_prompt = BaseAIProcessor.load_analysis_prompt()
 
-        Return the results in the following JSON format:
-        {
-            "sensitive_sections": [
-                {
-                    "text": "sensitive text excerpt",
-                    "category": "category name",
-                    "reason": "explanation why this is sensitive"
-                }
-            ]
-        }
-        Just give back the JSON and nothing else. Don't add any comments or explanations. Don't say "Here is the JSON" or anything like that.
-        Text to analyze:
-        """
+    def analyze_text(self, text: str):
+        """Analyze text for sensitive information using Azure OpenAI."""
+        prompt_template = Template(self.analysis_prompt)
+        final_user_prompt = prompt_template.substitute(text=text)
         
         try:
             response = self.client.chat.completions.create(
-                model=AZURE_DEPLOYMENT_NAME,
+                model=AZURE_OPENAI_DEPLOYMENT_NAME,
                 messages=[
-                    {"role": "system", "content": "You are a data privacy expert."},
-                    {"role": "user", "content": prompt + text}
+                    #{"role": "system", "content": "You are a data privacy expert."},  ## TODO: optional; Is a system prompt beneficial?
+                    {"role": "user", "content": final_user_prompt}
                 ],
-                #temperature=0.3
+                temperature=0.0,  # DS-A default 0.0 (lowest temperature for more deterministic greedy sampling)
+                top_p=1.0,  # Portal default 1.0
+                max_tokens=3000,  # Portal default 3000
+                stream=False,  # TODO: add streaming support
             )
-            #print(response.choices[0].message.content)
+
             return response.choices[0].message.content
         except Exception as e:
             print(f"Error calling Azure OpenAI: {str(e)}")
-            raise 
+            raise e

@@ -189,6 +189,7 @@ def main():
 
                 except Exception as e:
                     st.error(f"Error processing {uploaded_file.name}: {str(e)}")
+                    raise e
 
             progress_bar.progress(processed_count / total_files)
         
