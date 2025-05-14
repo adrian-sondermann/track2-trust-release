@@ -6,4 +6,7 @@ __pycache__/*
 
 wheels/
 
+# temp files
+data/tmp/*
+
 redacted_*.pdf

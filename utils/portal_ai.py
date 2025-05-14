@@ -17,16 +17,17 @@ class PortalAIProcessor:
             streaming=False, # streaming should probably be False within ProMoAI
     )
 
-    def get_completion(self, prompt):
-        system_message = "Du bist ein Assistent, welcher auf Deutsch antwortet."
+    def get_completion(self, prompt: str, text: str):
+        system_message = "You are a data privacy expert."
         messages = [
-            SystemMessage(content=system_message),
-            HumanMessage(content=prompt)
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": prompt + text}
         ]
         response = self.chat_model.invoke(messages)
+
         return response.content
 
-    def analyze_text(self, text):
+    def analyze_text(self, text: str):
         """
         Analyze the provided text for sensitive information.
         This method wraps `get_completion` so it has the same interface as AzureAIProcessor.
@@ -51,5 +52,6 @@ class PortalAIProcessor:
         }
         Just give back the JSON and nothing else. Don't add any comments or explanations. Don't say "Here is the JSON" or anything like that.
         Text to analyze:
-        """ + text
-        return self.get_completion(prompt) 
+        """
+
+        return self.get_completion(prompt, text) 

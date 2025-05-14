@@ -13,7 +13,7 @@ class PDFProcessor:
     MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB limit
 
     @staticmethod
-    def extract_text(pdf_file):
+    def extract_text(pdf_file) -> list[str]:
         """Extract text from PDF with size validation."""
         # Check file size
         pdf_file.seek(0, 2)  # Go to end of file
