@@ -31,7 +31,7 @@ class AzureAIProcessor:
                 }
             ]
         }
-
+        Just give back the JSON and nothing else. Don't add any comments or explanations. Don't say "Here is the JSON" or anything like that.
         Text to analyze:
         """
         

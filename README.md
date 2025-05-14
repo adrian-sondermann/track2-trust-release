@@ -56,3 +56,53 @@ This project is designed to tackle a prominent challenge in the public sector by
 **Impact:** Durch den Einsatz leistungsstarker KI-Technologien wie Azure OpenAI können Organisationen Risiken quantifizieren und messbare Verbesserungen im Datenschutz erzielen. Dies unterstützt transparente, fundierte Entscheidungsprozesse in der öffentlichen Verwaltung.
 **Machbarkeit:** Als MVP konzipiert unter Verwendung von Streamlit und modularen Designprinzipien, integriert die Lösung bewährte APIs und klare Abläufe, was eine realistische und umsetzbare Implementierung gewährleistet. Das benutzerfreundliche Design erleichtert zudem die Integration von Open-Data-Praktiken in behördliche Abläufe.
 **Skalierbarkeit:** Dank der integrierten Mehrsprachigkeit und modularen Architektur lässt sich die App problemlos erweitern und an verschiedene behördliche Kontexte anpassen, wodurch sie als digitales Gemeingut im öffentlichen Sektor dient und offene Dateninitiativen fördert.
+
+# Inspect redacted content
+
+## Convert PDF into text
+
+Convert the document to text using `pdftotext` (part of `poppler-utils`):
+```shell
+pdftotext <`redacted_input.pdf`>
+```
+
+## Hidden layers
+
+1. Using PDF debugging tools, e.g `qpdf` or `mutool`:
+
+   **Installation**
+
+   ```shell
+   sudo apt update
+   sudo apt install qpdf
+   sudo apt install mupdf-tools
+   ```
+
+   To show internal pdf object, run `mutool show <redacted_input.pdf>`.
+
+   To convert the PDF into an uncompressed format for manual inspection, run `qpdf --qdf --object-streams=disable <redacted_input.pdf> <output_qdf.pdf>`.
+
+2. Adobe Acrobat Pro 
+
+   Use "Content" pane or "Preflight" tools to inspect layers, hidden objects, or redactions. 
+
+
+3. PDF Editors / Viewers
+
+   Tools like PDF-XChange Editor or PDF Studio let you see and toggle visual layers manually.
+
+## Metadata
+
+Use `exiftool`
+
+**Installation**
+
+```shell
+sudo apt update
+sudo apt install libimage-exiftool-perl
+```
+
+To inspect metadata, run:
+```shell
+exiftool <redacted_input.pdf>
+```

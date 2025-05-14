@@ -1,13 +1,11 @@
 """Home"""
 
 import streamlit as st
-import tempfile
 import os
 from utils.pdf_processor import PDFProcessor
 from utils.azure_ai import AzureAIProcessor
 from utils.sensitivity_checker import SensitivityChecker
 from utils.pdf_redactor import PDFRedactor
-from sidebar import render_sidebar_logo
 from utils.common import initialize_page
 from PIL import Image
 from utils.cleanup import cleanup_temp_pdfs

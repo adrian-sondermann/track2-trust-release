@@ -7,7 +7,7 @@ from utils.sensitivity_checker import SensitivityChecker
 from utils.common import initialize_page
 #from utils.blackout import Blackout
 from utils.pdf_redactor import PDFRedactor
-
+from utils.cleanup import cleanup_temp_pdfs
 
 st.set_page_config(
     page_title="PDF Checker",
@@ -98,22 +98,30 @@ def main():
     st.title(t["title"])
     st.write(t["subtitle"])
 
-    # Update the UI elements with translated text
-    model_choice = st.radio(
+    # Model selection
+    model_options = {
+        "Azure Open AI: gpt-4o 2024-11-20": "Azure Open AI", 
+        "Portal: microsoft/phi-4": "Portal"
+    }
+    model_choice_label = st.selectbox(
         t["model_choice"],
-        options=["Azure Open AI","Portal"], # "Albert" entfernt
-        help=t["model_help"]
+        options=list(model_options.keys()),
+        index=1,
+        # help=t["model_help"]
     )
+    model_choice = model_options[model_choice_label]
 
     # Info-Banner einfügen
-    if model_choice == "Azure Open AI":
-        st.info("🔹 *Azure Open AI nutzt derzeit GPT-4o.*", icon="ℹ️")
-    elif model_choice == "Portal":
-        st.warning("⚠️ *Die Modelle im Portal befinden sich derzeit in der Entwicklung. Es kann zu unvollständigen oder fehlerhaften Erkennungen kommen.*", icon="⚠️")
+    #if model_choice == "Azure Open AI":
+    #    st.info("Azure Open AI nutzt derzeit GPT-4o.", icon="ℹ️")
+    #elif model_choice == "Portal":
+    #    st.warning("Die Modelle im Portal befinden sich derzeit in der Entwicklung. Es kann zu unvollständigen oder fehlerhaften Erkennungen kommen.", icon="⚠️")
 
     # Initialize session state
     if 'processed_docs' not in st.session_state:
-        st.session_state.processed_docs = {}
+        # 🧹 Temp-Ordner aufräumen
+        cleanup_temp_pdfs()
+        st.session_state["processed_docs"] = {}
     if 'uploader_key' not in st.session_state:
         st.session_state['uploader_key'] = "uploader_initial"
 
@@ -140,18 +148,23 @@ def main():
         total_files = len(uploaded_files)
         processed_count = 0
         
-        st.write(f"Processing {total_files} files...")
+        placeholder = st.empty()
+        placeholder.write(f"Processing {total_files} files...")
         progress_bar = st.progress(0)
         
         for uploaded_file in uploaded_files:
+            # Check if the file has already been processed to avoid reprocessing
+            # This check is based on the file name, which should be unique. 
+            # If the file name is not unique, consider using a hash or a unique identifier.
             if uploaded_file.name not in st.session_state.processed_docs:
+                placeholder.write(t["processing"].format(f"{processed_count}/{total_files}: {uploaded_file.name}"))
                 try:
                     # Check if the file is empty or too large
                     if uploaded_file.size == 0:
                         st.error(f"The file {uploaded_file.name} is empty. Please upload a valid PDF.")
                         continue
 
-                    with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
+                    with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf', dir="./data/tmp/") as tmp_file:
                         tmp_file.write(uploaded_file.getvalue())
                         tmp_path = tmp_file.name
 
@@ -164,6 +177,7 @@ def main():
                         text_content, 
                         ai_processor
                     )
+                    print(f"{uploaded_file.name}: Found {len(sensitive_sections)} sensitive sections")
 
                     st.session_state.processed_docs[uploaded_file.name] = {
                         'path': tmp_path,
@@ -171,14 +185,14 @@ def main():
                         'sensitive_sections': sensitive_sections,
                         'model': model_choice
                     }
-                    
+                    processed_count += 1
+
                 except Exception as e:
                     st.error(f"Error processing {uploaded_file.name}: {str(e)}")
-            
-            processed_count += 1
+
             progress_bar.progress(processed_count / total_files)
         
-        st.success(f"Processed {processed_count} files!")
+        placeholder.success(f"Successfully processed {processed_count}/{total_files} files!")
 
         # Instead of stacking results vertically, create a tab for each processed document.
         doc_names = list(st.session_state.processed_docs.keys())
@@ -245,7 +259,7 @@ def main():
                             confirmed = cols[4].checkbox(
                                 "✓", 
                                 key=f"confirm_{doc_name}_{i}", 
-                                value=False
+                                value=section['accepted']
                             )
                             
                             if confirmed:
@@ -269,7 +283,7 @@ def main():
                                     # Schwärzung anwenden
                                     #text_values = [s.get('sensitive_value') or s['text'] for s in confirmed_sections]
                                     #Blackout.redact_sentences(text_values, tmp_path, redacted_path)
-                                    PDFRedactor.redact_sections(tmp_path, confirmed_sections, redacted_path)
+                                    PDFRedactor.redact_sections(confirmed_sections, tmp_path, redacted_path)
 
                                     # Datei als Download anbieten
                                     with open(redacted_path, "rb") as file:
