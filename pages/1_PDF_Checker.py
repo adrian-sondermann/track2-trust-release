@@ -185,12 +185,12 @@ def main():
                         'sensitive_sections': sensitive_sections,
                         'model': model_choice
                     }
-                    processed_count += 1
 
                 except Exception as e:
                     st.error(f"Error processing {uploaded_file.name}: {str(e)}")
-                    raise e
-
+                    # raise e  # for debugging purposes only
+                    
+            processed_count += 1
             progress_bar.progress(processed_count / total_files)
         
         placeholder.success(f"Successfully processed {processed_count}/{total_files} files!")
@@ -204,6 +204,7 @@ def main():
                     st.subheader(f"Document: {doc_name}")
                     doc_data = st.session_state.processed_docs[doc_name]
                     
+                    # TODO: update risk assessment based on updated categories in prompt, opt.: 2nd function call
                     # Compute overall risk assessment for this document.
                     overall = "low"
                     if doc_data['sensitive_sections']:

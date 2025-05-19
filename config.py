@@ -17,6 +17,8 @@ PORTAL_API_USE_SSL=os.getenv("PORTAL_API_USE_SSL")
 
 PORTAL_API_MODEL_IDENTIFIER=os.getenv("PORTAL_API_MODEL_IDENTIFIER")
 
+# TODO: update SENSITIVITY_RULES with the actual rules and descriptions
+# TODO: opt. selection of rules before checking / redacting  
 # Sensitivity Check Configuration
 SENSITIVITY_RULES = {
     "personal_data": {
